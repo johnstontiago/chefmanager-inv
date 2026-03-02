@@ -38,7 +38,7 @@ export default function CategoriasTab() {
     }
   };
 
-  const filtradas = categorias.filter((c) => c.nombre?.toLowerCase()?.includes(busqueda?.toLowerCase() || ""));
+  const filtradas = (categorias || []).filter((c) => c.nombre?.toLowerCase()?.includes(busqueda?.toLowerCase() || ""));
 
   const openNew = () => { setEditingItem(null); setNombre(""); setShowDialog(true); };
   const openEdit = (item: any) => { setEditingItem(item); setNombre(item.nombre || ""); setShowDialog(true); };
