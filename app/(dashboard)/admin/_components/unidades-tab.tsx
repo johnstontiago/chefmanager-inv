@@ -70,7 +70,7 @@ export default function UnidadesTab() {
       const res = await fetch("/api/unidades");
       if (res.ok) {
         const data = await res.json();
-        setUnidades(data);
+        setUnidades(data?.unidades || []);
       }
     } catch (error) {
       toast({ title: "Error al cargar unidades", variant: "destructive" });
