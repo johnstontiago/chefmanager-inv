@@ -39,7 +39,7 @@ export default function ProveedoresTab() {
     }
   };
 
-  const filtrados = proveedores.filter((p) => p.nombre?.toLowerCase()?.includes(busqueda?.toLowerCase() || ""));
+  const filtrados = (proveedores || []).filter((p) => p.nombre?.toLowerCase()?.includes(busqueda?.toLowerCase() || ""));
 
   const openNew = () => {
     setEditingItem(null);
