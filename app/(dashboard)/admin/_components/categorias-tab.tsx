@@ -88,7 +88,7 @@ export default function CategoriasTab() {
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <CardTitle className="flex items-center space-x-2">
               <Tags className="w-5 h-5 text-blue-600" />
-              <span>Categorías ({categorias.length})</span>
+              <span>Categorías ({(categorias || []).length})</span>
             </CardTitle>
             <div className="flex space-x-2">
               <div className="relative">
