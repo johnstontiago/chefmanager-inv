@@ -13,23 +13,29 @@ export async function GET() {
     }
 
     const user = session.user as any;
-    let unidades;
+    let unidades: any[] = [];
 
-    if (user.rol === "superuser") {
+    // Superuser y Admin pueden ver todas las unidades (para asignar usuarios)
+    if (user.rol === "superuser" || user.rol === "admin") {
       unidades = await prisma.unidad.findMany({
         where: { activo: true },
         orderBy: { nombre: "asc" },
       });
     } else {
-      unidades = await prisma.unidad.findMany({
-        where: {
-          id: user.unidadId,
-          activo: true,
-        },
-      });
+      // Otros roles solo ven su propia unidad
+      if (user.unidadId) {
+        unidades = await prisma.unidad.findMany({
+          where: {
+            id: user.unidadId,
+            activo: true,
+          },
+        });
+      } else {
+        unidades = [];
+      }
     }
 
-    return NextResponse.json(unidades);
+    return NextResponse.json({ unidades });
   } catch (error) {
     console.error("Error fetching unidades:", error);
     return NextResponse.json(
