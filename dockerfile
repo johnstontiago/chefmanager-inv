@@ -1,47 +1,28 @@
-FROM node:18-alpine AS base
+FROM node:18-alpine
 
-FROM base AS deps
-RUN apk add --no-cache libc6-compat openssl
 WORKDIR /app
 
+# Instalar openssl para Prisma
+RUN apk add --no-cache openssl libc6-compat
+
+# Copiar archivos de configuración
 COPY package.json ./
 COPY prisma ./prisma/
 
+# Instalar dependencias
 RUN npm install --legacy-peer-deps
+
+# Generar Prisma Client
 RUN npx prisma generate
 
-FROM base AS builder
-WORKDIR /app
-COPY --from=deps /app/node_modules ./node_modules
-COPY --from=deps /app/node_modules/.prisma ./node_modules/.prisma
+# Copiar el resto del código
 COPY . .
 
-ENV NEXT_TELEMETRY_DISABLED=1
-
+# Build de la aplicación
 RUN npm run build
 
-FROM base AS runner
-WORKDIR /app
-
-ENV NODE_ENV=production
-ENV NEXT_TELEMETRY_DISABLED=1
-
-RUN apk add --no-cache openssl
-
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nextjs
-
-COPY --from=builder /app/public ./public
-COPY --from=builder /app/.next/standalone ./
-COPY --from=builder /app/.next/static ./.next/static
-COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
-COPY --from=builder /app/prisma ./prisma
-
-USER nextjs
-
+# Exponer puerto
 EXPOSE 3000
 
-ENV PORT=3000
-ENV HOSTNAME="0.0.0.0"
-
-CMD ["node", "server.js"]
+# Comando de inicio
+CMD ["npm", "run", "start"]
