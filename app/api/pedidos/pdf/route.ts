@@ -358,7 +358,7 @@ export async function POST(request: Request) {
         await archive.finalize();
         const zipBuffer = await archivePromise;
 
-        return new NextResponse(zipBuffer, {
+        return new NextResponse(new Uint8Array(zipBuffer), {
           headers: {
             "Content-Type": "application/zip",
             "Content-Disposition": `attachment; filename="Pedido${pedido.id}_${fechaStr}_por_proveedor.zip"`,
@@ -458,7 +458,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Error generando PDF" }, { status: 500 });
     }
 
-    return new NextResponse(pdfBuffer, {
+    return new NextResponse(new Uint8Array(pdfBuffer), {
       headers: {
         "Content-Type": "application/pdf",
         "Content-Disposition": `attachment; filename="${filename}"`,

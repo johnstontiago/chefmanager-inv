@@ -292,7 +292,7 @@ export async function GET(request: Request, { params }: { params: { tipo: string
       if (!pdfBuffer) {
         return NextResponse.json({ error: "Error generando PDF" }, { status: 500 });
       }
-      return new NextResponse(pdfBuffer, {
+      return new NextResponse(new Uint8Array(pdfBuffer), {
         headers: {
           "Content-Type": "application/pdf",
           "Content-Disposition": `attachment; filename="${filename}.pdf"`,
