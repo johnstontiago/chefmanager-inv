@@ -1,0 +1,62 @@
+import { NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth-options";
+import prisma from "@/lib/db";
+
+export const dynamic = "force-dynamic";
+
+// Proveedores son globales - compartidos entre todas las unidades
+export async function GET() {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user) {
+      return NextResponse.json({ error: "No autenticado" }, { status: 401 });
+    }
+
+    const proveedores = await prisma.proveedor.findMany({
+      where: { activo: true },
+      orderBy: { nombre: "asc" },
+    });
+
+    return NextResponse.json({ proveedores });
+  } catch (error) {
+    console.error("Error fetching proveedores:", error);
+    return NextResponse.json({ error: "Error interno" }, { status: 500 });
+  }
+}
+
+export async function POST(request: Request) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user) {
+      return NextResponse.json({ error: "No autenticado" }, { status: 401 });
+    }
+
+    const user = session.user as any;
+    // Solo admin o superuser pueden crear proveedores
+    if (!["admin", "superuser"].includes(user.rol)) {
+      return NextResponse.json({ error: "Sin permisos" }, { status: 403 });
+    }
+
+    const { nombre, contacto, telefono, email } = await request.json();
+
+    if (!nombre) {
+      return NextResponse.json({ error: "Nombre requerido" }, { status: 400 });
+    }
+
+    const proveedor = await prisma.proveedor.create({
+      data: {
+        nombre,
+        contacto: contacto || null,
+        telefono: telefono || null,
+        email: email || null,
+        activo: true,
+      },
+    });
+
+    return NextResponse.json({ proveedor, message: "Proveedor creado" });
+  } catch (error) {
+    console.error("Error creating proveedor:", error);
+    return NextResponse.json({ error: "Error al crear proveedor" }, { status: 500 });
+  }
+}

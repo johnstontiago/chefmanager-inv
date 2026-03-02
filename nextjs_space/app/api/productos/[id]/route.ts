@@ -1,0 +1,93 @@
+import { NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth-options";
+import prisma from "@/lib/db";
+import { Decimal } from "@prisma/client/runtime/library";
+import { toNumber } from "@/lib/utils";
+
+export const dynamic = "force-dynamic";
+
+// Productos son globales - compartidos entre todas las unidades
+export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user) return NextResponse.json({ error: "No autenticado" }, { status: 401 });
+
+    const { id } = await params;
+    
+    const producto = await prisma.producto.findUnique({
+      where: { id: parseInt(id) },
+      include: { categoria: true, proveedor: true },
+    });
+
+    if (!producto) return NextResponse.json({ error: "No encontrado" }, { status: 404 });
+
+    return NextResponse.json({ producto: { ...producto, precioUnitario: toNumber(producto.precioUnitario), stockMinimo: toNumber(producto.stockMinimo) } });
+  } catch (error) {
+    console.error("Error getting producto:", error);
+    return NextResponse.json({ error: "Error interno" }, { status: 500 });
+  }
+}
+
+export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user) return NextResponse.json({ error: "No autenticado" }, { status: 401 });
+
+    const user = session.user as any;
+    // Solo admin o superuser pueden editar productos
+    if (!["admin", "superuser"].includes(user.rol)) {
+      return NextResponse.json({ error: "Sin permisos" }, { status: 403 });
+    }
+
+    const { id } = await params;
+    const { nombre, categoriaId, proveedorId, unidadMedida, precioUnitario, stockMinimo, activo } = await request.json();
+
+    const existing = await prisma.producto.findUnique({ where: { id: parseInt(id) } });
+    if (!existing) return NextResponse.json({ error: "No encontrado" }, { status: 404 });
+
+    const producto = await prisma.producto.update({
+      where: { id: parseInt(id) },
+      data: {
+        nombre,
+        categoriaId,
+        proveedorId: proveedorId || null,
+        unidadMedida,
+        precioUnitario: new Decimal(precioUnitario),
+        stockMinimo: new Decimal(stockMinimo),
+        activo: activo !== undefined ? activo : existing.activo,
+      },
+    });
+
+    return NextResponse.json({ producto: { ...producto, precioUnitario: toNumber(producto.precioUnitario), stockMinimo: toNumber(producto.stockMinimo) } });
+  } catch (error) {
+    console.error("Error updating producto:", error);
+    return NextResponse.json({ error: "Error interno" }, { status: 500 });
+  }
+}
+
+export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user) return NextResponse.json({ error: "No autenticado" }, { status: 401 });
+
+    const user = session.user as any;
+    // Solo admin o superuser pueden eliminar productos
+    if (!["admin", "superuser"].includes(user.rol)) {
+      return NextResponse.json({ error: "Sin permisos" }, { status: 403 });
+    }
+
+    const { id } = await params;
+
+    const existing = await prisma.producto.findUnique({ where: { id: parseInt(id) } });
+    if (!existing) return NextResponse.json({ error: "No encontrado" }, { status: 404 });
+
+    // Soft delete
+    await prisma.producto.update({ where: { id: parseInt(id) }, data: { activo: false } });
+
+    return NextResponse.json({ message: "Producto eliminado" });
+  } catch (error) {
+    console.error("Error deleting producto:", error);
+    return NextResponse.json({ error: "Error interno" }, { status: 500 });
+  }
+}
