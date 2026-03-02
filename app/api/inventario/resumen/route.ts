@@ -57,7 +57,7 @@ export async function GET(request: Request) {
     let proximosCaducar = 0;
     let valorTotal = 0;
 
-    const resumenProductos = productos.map((p) => {
+    const resumenProductos = productos.map((p: any) => {
       const productInventario = inventarioPorProducto.get(p.id) || [];
       const cantidadTotal = productInventario.reduce(
         (sum: number, inv: any) => sum + toNumber(inv.cantidad),
