@@ -53,7 +53,7 @@ export default function UsuariosTab() {
     }
   };
 
- const filtrados = (usuarios || []).filter((u) => u.nombre?.toLowerCase()?.includes(busqueda?.toLowerCase() || "") || u.email?.toLowerCase()?.includes(busqueda?.toLowerCase() || ""));
+  const filtrados = (usuarios || []).filter((u) => u.nombre?.toLowerCase()?.includes(busqueda?.toLowerCase() || "") || u.email?.toLowerCase()?.includes(busqueda?.toLowerCase() || ""));
 
   const openNew = () => {
     setEditingItem(null);
@@ -128,7 +128,7 @@ export default function UsuariosTab() {
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <CardTitle className="flex items-center space-x-2">
               <Users className="w-5 h-5 text-blue-600" />
-              <span>Usuarios ({usuarios.length})</span>
+              <span>Usuarios ({(usuarios || []).length})</span>
             </CardTitle>
             <div className="flex space-x-2">
               <div className="relative">
@@ -194,7 +194,7 @@ export default function UsuariosTab() {
                   <SelectTrigger><SelectValue placeholder="Sin asignar" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="none">Sin asignar</SelectItem>
-                    {unidades.map((u) => <SelectItem key={u.id} value={u.id.toString()}>{u.nombre}</SelectItem>)}
+                    {(unidades || []).map((u) => <SelectItem key={u.id} value={u.id.toString()}>{u.nombre}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
