@@ -167,9 +167,9 @@ export default function UnidadesTab() {
 
   const filteredUnidades = (unidades || []).filter(
     (u) =>
-      u.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      u.direccion?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      u.responsable?.toLowerCase().includes(searchTerm.toLowerCase())
+      u.nombre?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      u.direccion?.toLowerCase()?.includes(searchTerm.toLowerCase()) ||
+      u.responsable?.toLowerCase()?.includes(searchTerm.toLowerCase())
   );
 
   if (loading) {
@@ -266,7 +266,6 @@ export default function UnidadesTab() {
         </div>
       )}
 
-      {/* Create/Edit Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
@@ -348,7 +347,6 @@ export default function UnidadesTab() {
         </DialogContent>
       </Dialog>
 
-      {/* Delete Confirmation Dialog */}
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
