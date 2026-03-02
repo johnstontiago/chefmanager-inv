@@ -95,7 +95,7 @@ export default function ProductosTab() {
     }
   };
 
-  const productosFiltrados = productos.filter((p) =>
+  const productosFiltrados = Array.isArray(productos) ? productos.filter((p) =>
     p.nombre?.toLowerCase()?.includes(busqueda?.toLowerCase() || "")
   );
 
@@ -275,7 +275,7 @@ export default function ProductosTab() {
                     <SelectValue placeholder="Seleccionar" />
                   </SelectTrigger>
                   <SelectContent>
-                    {categorias.map((cat) => (
+                    {(categorias || []).map((cat) => (
                       <SelectItem key={cat.id} value={cat.id.toString()}>
                         {cat.nombre}
                       </SelectItem>
@@ -291,7 +291,7 @@ export default function ProductosTab() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="none">Sin proveedor</SelectItem>
-                    {proveedores.map((prov) => (
+                    {(proveedores || []).map((prov) => (
                       <SelectItem key={prov.id} value={prov.id.toString()}>
                         {prov.nombre}
                       </SelectItem>
