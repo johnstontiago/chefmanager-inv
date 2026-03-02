@@ -95,7 +95,7 @@ export default function ProductosTab() {
     }
   };
 
-  const productosFiltrados = Array.isArray(productos) ? productos.filter((p) =>
+  const productosFiltrados = (productos || []).filter((p) =>
     p.nombre?.toLowerCase()?.includes(busqueda?.toLowerCase() || "")
   );
 
@@ -196,7 +196,7 @@ export default function ProductosTab() {
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <CardTitle className="flex items-center space-x-2">
               <Package className="w-5 h-5 text-blue-600" />
-              <span>Productos ({productos.length})</span>
+              <span>Productos ({(productos || []).length})</span>
             </CardTitle>
             <div className="flex space-x-2">
               <div className="relative">
@@ -252,7 +252,6 @@ export default function ProductosTab() {
         </CardContent>
       </Card>
 
-      {/* Create/Edit Dialog */}
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
         <DialogContent>
           <DialogHeader>
@@ -352,7 +351,6 @@ export default function ProductosTab() {
         </DialogContent>
       </Dialog>
 
-      {/* Delete Dialog */}
       <AlertDialog open={!!deleteProduct} onOpenChange={() => setDeleteProduct(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
