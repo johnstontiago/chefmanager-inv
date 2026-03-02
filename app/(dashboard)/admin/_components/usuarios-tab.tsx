@@ -53,7 +53,7 @@ export default function UsuariosTab() {
     }
   };
 
-  const filtrados = usuarios.filter((u) => u.nombre?.toLowerCase()?.includes(busqueda?.toLowerCase() || "") || u.email?.toLowerCase()?.includes(busqueda?.toLowerCase() || ""));
+ const filtrados = (usuarios || []).filter((u) => u.nombre?.toLowerCase()?.includes(busqueda?.toLowerCase() || "") || u.email?.toLowerCase()?.includes(busqueda?.toLowerCase() || ""));
 
   const openNew = () => {
     setEditingItem(null);
