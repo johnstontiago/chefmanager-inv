@@ -98,7 +98,7 @@ export default function ProveedoresTab() {
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <CardTitle className="flex items-center space-x-2">
               <Truck className="w-5 h-5 text-blue-600" />
-              <span>Proveedores ({proveedores.length})</span>
+              <span>Proveedores ({(proveedores || []).length})</span>
             </CardTitle>
             <div className="flex space-x-2">
               <div className="relative">
