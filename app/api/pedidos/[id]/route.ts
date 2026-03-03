@@ -28,7 +28,8 @@ export async function GET(
     const pedido = await prisma.pedido.findFirst({
       where: whereClause,
       include: {
-        usuario: { select: { nombre: true, email: true } },
+        proveedor: { select: { id: true, nombre: true } },
+        unidad: { select: { id: true, nombre: true } },
         items: {
           include: {
             producto: {

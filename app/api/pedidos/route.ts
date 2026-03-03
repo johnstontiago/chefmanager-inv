@@ -23,9 +23,8 @@ export async function GET() {
 
     const pedidos = await prisma.pedido.findMany({
       where: { unidadId },
-      orderBy: { fechaPedido: "desc" },
+      orderBy: { createdAt: "desc" },
       include: {
-        usuario: { select: { nombre: true, email: true } },
         proveedor: { select: { nombre: true } },
         items: {
           include: {
@@ -71,7 +70,6 @@ export async function POST(request: Request) {
 
     const user = session.user as any;
     const unidadId = user.unidadId;
-    const userId = parseInt(user.id);
 
     if (!unidadId) {
       return NextResponse.json({ error: "Sin unidad" }, { status: 400 });
@@ -83,17 +81,14 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Items requeridos" }, { status: 400 });
     }
 
-    // Calculate total
     let total = 0;
     for (const item of items) {
       total += parseFloat(item.cantidad) * parseFloat(item.precioUnitario);
     }
 
-    // Create pedido
     const pedido = await prisma.pedido.create({
       data: {
         unidadId,
-        usuarioId: userId,
         estado,
         total: new Decimal(total),
         notas: notas || null,
@@ -102,6 +97,7 @@ export async function POST(request: Request) {
             productoId: item.productoId,
             cantidad: new Decimal(item.cantidad),
             precioUnitario: new Decimal(item.precioUnitario),
+            subtotal: new Decimal(parseFloat(item.cantidad) * parseFloat(item.precioUnitario)),
           })),
         },
       },

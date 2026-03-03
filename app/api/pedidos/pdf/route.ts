@@ -66,7 +66,7 @@ function generatePDFHtml(
         </div>
         <div class="info-box">
           <label>Fecha</label>
-          <p>${formatDate(pedido.fechaPedido)}</p>
+          <p>${formatDate(pedido.createdAt)}</p>
         </div>
         <div class="info-box">
           <label>Estado</label>
@@ -96,7 +96,7 @@ function generatePDFHtml(
       
       <div class="footer">
         <p>Generado el ${new Date().toLocaleDateString("es-ES", { day: "2-digit", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" })}</p>
-        <p>PANZZONI - Cantina e Pizza &copy; ${new Date().getFullYear()}</p>
+        <p>PANZZONI - Cantina e Pizza © ${new Date().getFullYear()}</p>
       </div>
     </body>
     </html>
@@ -123,7 +123,6 @@ async function generatePDF(html: string, filename: string): Promise<Buffer | nul
     const { request_id } = await createResponse.json();
     if (!request_id) return null;
 
-    // Poll for completion
     for (let i = 0; i < 60; i++) {
       await new Promise((r) => setTimeout(r, 1000));
 
@@ -170,11 +169,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Parámetros requeridos" }, { status: 400 });
     }
 
-    // Fetch pedido with all relations
     const pedido = await prisma.pedido.findFirst({
       where: { id: pedidoId, unidadId: user.unidadId },
       include: {
-        usuario: { select: { nombre: true } },
+        proveedor: { select: { id: true, nombre: true } },
         items: {
           include: {
             producto: {
@@ -192,7 +190,6 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Pedido no encontrado" }, { status: 404 });
     }
 
-    // Format items
     const items = pedido.items.map((i: any) => ({
       ...i,
       cantidad: toNumber(i.cantidad),
@@ -207,7 +204,6 @@ export async function POST(request: Request) {
     let filename = `pedido_${pedido.id}.pdf`;
 
     if (tipo === "completo") {
-      // Generate complete PDF
       const html = generatePDFHtml(
         pedido,
         items,
@@ -216,7 +212,6 @@ export async function POST(request: Request) {
       );
       pdfBuffer = await generatePDF(html, filename);
     } else if (tipo === "por_proveedor") {
-      // Group by supplier
       const byProveedor: Record<string, any[]> = {};
       for (const item of items) {
         const provNombre = item.producto?.proveedor?.nombre || "Sin Proveedor";
@@ -225,16 +220,14 @@ export async function POST(request: Request) {
       }
 
       const proveedores = Object.keys(byProveedor);
-      const fechaStr = new Date(pedido.fechaPedido).toLocaleDateString("es-ES", {
+      const fechaStr = new Date(pedido.createdAt).toLocaleDateString("es-ES", {
         day: "2-digit",
         month: "2-digit", 
         year: "numeric"
       }).replace(/\//g, "-");
 
-      // Helper to sanitize filename
       const sanitizeName = (name: string) => name.replace(/[^a-zA-Z0-9áéíóúñÁÉÍÓÚÑ\s]/g, "").replace(/\s+/g, "_").substring(0, 30);
 
-      // Generate individual PDF for each supplier
       const generateProveedorHtml = (provNombre: string, provItems: any[]) => `
         <!DOCTYPE html>
         <html>
@@ -272,7 +265,7 @@ export async function POST(request: Request) {
             </div>
             <div class="info-box">
               <label>Fecha</label>
-              <p>${formatDate(pedido.fechaPedido)}</p>
+              <p>${formatDate(pedido.createdAt)}</p>
             </div>
             <div class="info-box">
               <label>Estado</label>
@@ -313,7 +306,6 @@ export async function POST(request: Request) {
         </html>
       `;
 
-      // If only one supplier, return single PDF
       if (proveedores.length === 1) {
         const provNombre = proveedores[0];
         const provItems = byProveedor[provNombre];
@@ -321,7 +313,6 @@ export async function POST(request: Request) {
         filename = `${sanitizeName(provNombre)}_${fechaStr}_Pedido${pedido.id}.pdf`;
         pdfBuffer = await generatePDF(html, filename);
       } else {
-        // Multiple suppliers: generate ZIP with individual PDFs
         const pdfFiles: { name: string; buffer: Buffer }[] = [];
         
         for (const provNombre of proveedores) {
@@ -338,12 +329,8 @@ export async function POST(request: Request) {
           return NextResponse.json({ error: "Error generando PDFs" }, { status: 500 });
         }
 
-        // Create ZIP archive
-        const { Readable } = await import("stream");
         const chunks: Buffer[] = [];
-        
         const archive = archiver("zip", { zlib: { level: 9 } });
-        
         archive.on("data", (chunk: Buffer) => chunks.push(chunk));
         
         const archivePromise = new Promise<Buffer>((resolve, reject) => {
@@ -366,7 +353,6 @@ export async function POST(request: Request) {
         });
       }
     } else if (tipo === "por_categoria") {
-      // Group by category
       const byCategoria: Record<string, any[]> = {};
       for (const item of items) {
         const catNombre = item.producto?.categoria?.nombre || "Sin Categoría";
@@ -398,7 +384,7 @@ export async function POST(request: Request) {
         <body>
           <div class="header">
             <h1>Pedido #${pedido.id} - Por Categoría</h1>
-            <p>Fecha: ${formatDate(pedido.fechaPedido)}</p>
+            <p>Fecha: ${formatDate(pedido.createdAt)}</p>
           </div>
       `;
 

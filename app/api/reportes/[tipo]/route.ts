@@ -70,7 +70,7 @@ export async function GET(request: Request, { params }: { params: { tipo: string
       });
 
       if (format === "csv") {
-        const headers = ["Producto", "Categor\u00eda", "Proveedor", "Cantidad", "Unidad", "Lote", "Caducidad", "Ubicaci\u00f3n", "C\u00f3digo"];
+        const headers = ["Producto", "Categoría", "Proveedor", "Cantidad", "Unidad", "Lote", "Caducidad", "Ubicación", "Código"];
         const rows = inventario.map((inv: any) => [
           inv.producto?.nombre || "",
           inv.producto?.categoria?.nombre || "",
@@ -107,27 +107,26 @@ export async function GET(request: Request, { params }: { params: { tipo: string
           <h1>Reporte de Inventario</h1>
           <p>Fecha: ${new Date().toLocaleDateString("es-ES")} | Total items: ${inventario.length}</p>
           <table>
-            <thead><tr><th>Producto</th><th>Categor\u00eda</th><th>Cantidad</th><th>Lote</th><th>Caducidad</th><th>Ubicaci\u00f3n</th></tr></thead>
+            <thead><tr><th>Producto</th><th>Categoría</th><th>Cantidad</th><th>Lote</th><th>Caducidad</th><th>Ubicación</th></tr></thead>
             <tbody>${rows}</tbody>
           </table>
-          <div class="footer">ChefManager Pro - Generado autom\u00e1ticamente</div>
+          <div class="footer">ChefManager Pro - Generado automáticamente</div>
         </body></html>`;
       }
     } else if (tipo === "pedidos") {
       const pedidos = await prisma.pedido.findMany({
         where: { unidadId },
-        include: { usuario: { select: { nombre: true } }, items: { include: { producto: true } } },
-        orderBy: { fechaPedido: "desc" },
+        include: { items: { include: { producto: true } } },
+        orderBy: { createdAt: "desc" },
         take: 100,
       });
 
       if (format === "csv") {
-        const headers = ["ID", "Fecha", "Estado", "Usuario", "Items", "Total"];
+        const headers = ["ID", "Fecha", "Estado", "Items", "Total"];
         const rows = pedidos.map((p: any) => [
           p.id.toString(),
-          formatDate(p.fechaPedido),
+          formatDate(p.createdAt),
           p.estado,
-          p.usuario?.nombre || "",
           p.items.length.toString(),
           toNumber(p.total).toFixed(2),
         ]);
@@ -136,9 +135,8 @@ export async function GET(request: Request, { params }: { params: { tipo: string
         const rows = pedidos.map((p: any) => `
           <tr>
             <td>#${p.id}</td>
-            <td>${formatDate(p.fechaPedido)}</td>
+            <td>${formatDate(p.createdAt)}</td>
             <td><span class="badge ${p.estado}">${p.estado}</span></td>
-            <td>${p.usuario?.nombre || "-"}</td>
             <td style="text-align:center;">${p.items.length}</td>
             <td style="text-align:right;">${formatCurrency(p.total)}</td>
           </tr>
@@ -158,24 +156,24 @@ export async function GET(request: Request, { params }: { params: { tipo: string
           <h1>Reporte de Pedidos</h1>
           <p>Fecha: ${new Date().toLocaleDateString("es-ES")} | Total: ${pedidos.length} pedidos</p>
           <table>
-            <thead><tr><th>ID</th><th>Fecha</th><th>Estado</th><th>Usuario</th><th>Items</th><th style="text-align:right;">Total</th></tr></thead>
+            <thead><tr><th>ID</th><th>Fecha</th><th>Estado</th><th>Items</th><th style="text-align:right;">Total</th></tr></thead>
             <tbody>${rows}</tbody>
           </table>
-          <div class="footer">ChefManager Pro - Generado autom\u00e1ticamente</div>
+          <div class="footer">ChefManager Pro - Generado automáticamente</div>
         </body></html>`;
       }
     } else if (tipo === "consumos") {
       const movimientos = await prisma.movimiento.findMany({
         where: { unidadId, tipo: { in: ["consumo", "merma"] } },
         include: { producto: true, usuario: { select: { nombre: true } } },
-        orderBy: { fecha: "desc" },
+        orderBy: { createdAt: "desc" },
         take: 200,
       });
 
       if (format === "csv") {
         const headers = ["Fecha", "Producto", "Tipo", "Cantidad", "Lote", "Usuario", "Notas"];
         const rows = movimientos.map((m: any) => [
-          formatDate(m.fecha),
+          formatDate(m.createdAt),
           m.producto?.nombre || "",
           m.tipo,
           formatDecimal(m.cantidad),
@@ -187,7 +185,7 @@ export async function GET(request: Request, { params }: { params: { tipo: string
       } else {
         const rows = movimientos.map((m: any) => `
           <tr>
-            <td>${formatDate(m.fecha)}</td>
+            <td>${formatDate(m.createdAt)}</td>
             <td>${m.producto?.nombre}</td>
             <td><span class="badge ${m.tipo}">${m.tipo}</span></td>
             <td style="text-align:center;">${formatDecimal(m.cantidad)} ${m.producto?.unidadMedida}</td>
@@ -212,7 +210,7 @@ export async function GET(request: Request, { params }: { params: { tipo: string
             <thead><tr><th>Fecha</th><th>Producto</th><th>Tipo</th><th>Cantidad</th><th>Lote</th><th>Usuario</th></tr></thead>
             <tbody>${rows}</tbody>
           </table>
-          <div class="footer">ChefManager Pro - Generado autom\u00e1ticamente</div>
+          <div class="footer">ChefManager Pro - Generado automáticamente</div>
         </body></html>`;
       }
     } else if (tipo === "caducidades") {
@@ -230,7 +228,7 @@ export async function GET(request: Request, { params }: { params: { tipo: string
       });
 
       if (format === "csv") {
-        const headers = ["Producto", "Categor\u00eda", "Cantidad", "Lote", "Caducidad", "D\u00edas restantes", "Ubicaci\u00f3n"];
+        const headers = ["Producto", "Categoría", "Cantidad", "Lote", "Caducidad", "Días restantes", "Ubicación"];
         const rows = inventario.map((inv: any) => [
           inv.producto?.nombre || "",
           inv.producto?.categoria?.nombre || "",
@@ -252,7 +250,7 @@ export async function GET(request: Request, { params }: { params: { tipo: string
               <td style="text-align:center;">${formatDecimal(inv.cantidad)} ${inv.producto?.unidadMedida}</td>
               <td>${inv.lote || "-"}</td>
               <td>${formatDate(inv.fechaCaducidad)}</td>
-              <td style="text-align:center; color: ${color}; font-weight: bold;">${days} d\u00edas</td>
+              <td style="text-align:center; color: ${color}; font-weight: bold;">${days} días</td>
               <td>${inv.ubicacion || "-"}</td>
             </tr>
           `;
@@ -268,16 +266,16 @@ export async function GET(request: Request, { params }: { params: { tipo: string
           .footer { margin-top: 30px; text-align: center; color: #64748b; font-size: 12px; }
         </style></head><body>
           <h1>Reporte de Caducidades</h1>
-          <p>Fecha: ${new Date().toLocaleDateString("es-ES")} | Productos pr\u00f3ximos a caducar: ${inventario.length}</p>
+          <p>Fecha: ${new Date().toLocaleDateString("es-ES")} | Productos próximos a caducar: ${inventario.length}</p>
           <table>
-            <thead><tr><th>Producto</th><th>Categor\u00eda</th><th>Cantidad</th><th>Lote</th><th>Caducidad</th><th>D\u00edas</th><th>Ubicaci\u00f3n</th></tr></thead>
+            <thead><tr><th>Producto</th><th>Categoría</th><th>Cantidad</th><th>Lote</th><th>Caducidad</th><th>Días</th><th>Ubicación</th></tr></thead>
             <tbody>${rows}</tbody>
           </table>
-          <div class="footer">ChefManager Pro - Generado autom\u00e1ticamente</div>
+          <div class="footer">ChefManager Pro - Generado automáticamente</div>
         </body></html>`;
       }
     } else {
-      return NextResponse.json({ error: "Tipo de reporte no v\u00e1lido" }, { status: 400 });
+      return NextResponse.json({ error: "Tipo de reporte no válido" }, { status: 400 });
     }
 
     if (format === "csv") {

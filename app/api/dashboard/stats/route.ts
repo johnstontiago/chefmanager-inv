@@ -24,25 +24,21 @@ export async function GET() {
     today.setHours(0, 0, 0, 0);
     const in7Days = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
 
-    // Productos son globales, inventario es por unidad
     const productos = await prisma.producto.findMany({
       where: { activo: true },
     });
 
-    // Obtener inventario de la unidad
     const inventarioUnidad = await prisma.inventario.findMany({
       where: { unidadId, estado: "disponible" },
       include: { producto: true },
     });
 
-    // Calcular stock por producto
     const stockPorProducto = new Map<number, number>();
     for (const inv of inventarioUnidad) {
       const current = stockPorProducto.get(inv.productoId) || 0;
       stockPorProducto.set(inv.productoId, current + toNumber(inv.cantidad));
     }
 
-    // Calculate low stock products
     let stockBajo = 0;
     for (const prod of productos) {
       const totalStock = stockPorProducto.get(prod.id) || 0;
@@ -51,7 +47,6 @@ export async function GET() {
       }
     }
 
-    // Products about to expire (next 7 days)
     const proximosACaducar = await prisma.inventario.count({
       where: {
         unidadId,
@@ -63,7 +58,6 @@ export async function GET() {
       },
     });
 
-    // Pending orders
     const pedidosPendientes = await prisma.pedido.count({
       where: {
         unidadId,
@@ -71,13 +65,11 @@ export async function GET() {
       },
     });
 
-    // Calculate total inventory value
     let valorInventario = 0;
     for (const inv of inventarioUnidad) {
       valorInventario += toNumber(inv.cantidad) * toNumber(inv.producto.precioUnitario);
     }
 
-    // Recent movements (last 10)
     const ultimosMovimientos = await prisma.movimiento.findMany({
       where: { unidadId },
       orderBy: { createdAt: "desc" },
@@ -88,20 +80,18 @@ export async function GET() {
       },
     });
 
-    // Format movements for response
     const movimientosFormateados = ultimosMovimientos.map((m: any) => ({
       id: m.id,
       productoNombre: m.producto.nombre,
       tipo: m.tipo,
       cantidad: toNumber(m.cantidad),
       unidadMedida: m.producto.unidadMedida,
-      usuario: m.usuario.nombre,
-      fecha: m.fecha.toISOString(),
+      usuario: m.usuario?.nombre || "Sistema",
+      fecha: m.createdAt.toISOString(),
       lote: m.lote,
       notas: m.notas,
     }));
 
-    // Orders pending to receive
     const pedidosParaRecibir = await prisma.pedido.count({
       where: {
         unidadId,

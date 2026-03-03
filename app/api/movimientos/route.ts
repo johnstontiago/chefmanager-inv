@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-options";
-import { prisma } from "@/lib/db";
+import prisma from "@/lib/db";
 import { Decimal } from "@prisma/client/runtime/library";
 import { toNumber } from "@/lib/utils";
 
@@ -30,7 +30,6 @@ export async function GET(request: Request) {
       where.tipo = tipo;
     }
 
-    // CORREGIDO: createdAt en vez de fecha
     const movimientos = await prisma.movimiento.findMany({
       where,
       orderBy: { createdAt: "desc" },
@@ -78,7 +77,6 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Datos incompletos" }, { status: 400 });
     }
 
-    // Productos son globales
     const producto = await prisma.producto.findUnique({
       where: { id: productoId },
     });
@@ -87,7 +85,6 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Producto no encontrado" }, { status: 404 });
     }
 
-    // Create movement
     const movimiento = await prisma.movimiento.create({
       data: {
         productoId,
@@ -104,7 +101,6 @@ export async function POST(request: Request) {
       },
     });
 
-    // Update inventory if consumo or merma
     if ((tipo === "consumo" || tipo === "merma") && inventarioId) {
       const inventario = await prisma.inventario.findUnique({
         where: { id: inventarioId },
@@ -113,7 +109,6 @@ export async function POST(request: Request) {
       if (inventario) {
         const nuevaCantidad = toNumber(inventario.cantidad) - parseFloat(cantidad);
         if (nuevaCantidad <= 0) {
-          // Mark as consumed
           await prisma.inventario.update({
             where: { id: inventarioId },
             data: { cantidad: 0, estado: "consumido" },
