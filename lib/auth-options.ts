@@ -25,7 +25,7 @@ export const authOptions: NextAuthOptions = {
           throw new Error("Usuario no encontrado o inactivo");
         }
 
-        const isValid = await bcrypt.compare(credentials.password, usuario.passwordHash);
+        const isValid = await bcrypt.compare(credentials.password, usuario.password);
         if (!isValid) {
           throw new Error("Contraseña incorrecta");
         }
