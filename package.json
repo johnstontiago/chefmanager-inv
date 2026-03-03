@@ -6,6 +6,8 @@
   "dev": "next dev",
   "build": "rm -rf node_modules/.prisma && prisma generate && next build",
   "start": "next start",
+  //puse esa linea martes 030326
+  "start": "npx prisma migrate deploy && node dist/index.js"
   "lint": "next lint"
 },
   "dependencies": {
