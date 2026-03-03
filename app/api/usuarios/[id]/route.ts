@@ -21,13 +21,13 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
     if (!existing) return NextResponse.json({ error: "No encontrado" }, { status: 404 });
 
     const data: any = { email, nombre, rol, unidadId: unidadId || null };
-    if (password) data.passwordHash = await bcrypt.hash(password, 10);
+    if (password) data.password = await bcrypt.hash(password, 10);
     if (pinCode) data.pinCode = pinCode;
     if (activo !== undefined) data.activo = activo;
 
     const usuario = await prisma.usuario.update({ where: { id: parseInt(id) }, data });
 
-    return NextResponse.json({ usuario: { ...usuario, passwordHash: undefined } });
+    return NextResponse.json({ usuario: { ...usuario, password: undefined } });
   } catch (error) {
     console.error("Error updating user:", error);
     return NextResponse.json({ error: "Error interno" }, { status: 500 });

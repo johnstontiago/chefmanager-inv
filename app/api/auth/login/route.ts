@@ -28,7 +28,7 @@ export async function POST(request: Request) {
       );
     }
 
-  const isValid = await bcrypt.compare(password, usuario.password);
+    const isValid = await bcrypt.compare(password, usuario.password);
     if (!isValid) {
       return NextResponse.json(
         { error: "Contraseña incorrecta" },

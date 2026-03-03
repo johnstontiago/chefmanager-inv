@@ -54,13 +54,13 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "El email ya existe" }, { status: 400 });
     }
 
-    const passwordHash = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(password, 10);
 
     const usuario = await prisma.usuario.create({
       data: {
         email,
         nombre,
-        passwordHash,
+        password: hashedPassword,
         rol: rol || "viewer",
         unidadId: unidadId || null,
         pinCode: pinCode || null,
@@ -68,7 +68,7 @@ export async function POST(request: Request) {
       },
     });
 
-    return NextResponse.json({ usuario: { ...usuario, passwordHash: undefined } });
+    return NextResponse.json({ usuario: { ...usuario, password: undefined } });
   } catch (error) {
     return NextResponse.json({ error: "Error interno" }, { status: 500 });
   }

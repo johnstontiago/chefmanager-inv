@@ -96,7 +96,7 @@ function generatePDFHtml(
       
       <div class="footer">
         <p>Generado el ${new Date().toLocaleDateString("es-ES", { day: "2-digit", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" })}</p>
-        <p>PANZZONI - Cantina e Pizza © ${new Date().getFullYear()}</p>
+        <p>PANZZONI - Cantina e Pizza &copy; ${new Date().getFullYear()}</p>
       </div>
     </body>
     </html>

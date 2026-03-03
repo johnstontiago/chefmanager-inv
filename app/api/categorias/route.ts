@@ -5,7 +5,6 @@ import prisma from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 
-// Categorías son globales - compartidas entre todas las unidades
 export async function GET() {
   try {
     const session = await getServerSession(authOptions);
@@ -33,7 +32,6 @@ export async function POST(request: Request) {
     }
 
     const user = session.user as any;
-    // Solo admin o superuser pueden crear categorías
     if (!["admin", "superuser"].includes(user.rol)) {
       return NextResponse.json({ error: "Sin permisos" }, { status: 403 });
     }
@@ -44,7 +42,6 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Nombre requerido" }, { status: 400 });
     }
 
-    // Verificar si ya existe
     const existing = await prisma.categoria.findFirst({ where: { nombre } });
     if (existing) {
       return NextResponse.json({ error: "Ya existe una categoría con ese nombre" }, { status: 400 });
