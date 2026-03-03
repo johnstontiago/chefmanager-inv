@@ -73,7 +73,7 @@ export default function PinVerification({ userName }: PinVerificationProps) {
   };
 
   const handleLogout = async () => {
-    await signOut({ redirect: true, callbackUrl: `${window.location.origin}/login` });
+    await signOut({ redirect: true, callbackUrl: "/login" });
   };
 
   return (
