@@ -95,16 +95,15 @@ async function main() {
 
   console.log("Usuarios creados");
 
-  // Crear Categorías GLOBALES (sin unidadId)
+  // Crear Categorías GLOBALES - usando findFirst + create (nombre no es unique)
   const categoriasNames = ["Carnes", "Pescados", "Verduras", "Lácteos", "Secos"];
   const categorias: any[] = [];
   
   for (const nombre of categoriasNames) {
-    const cat = await prisma.categoria.upsert({
-      where: { nombre },
-      update: {},
-      create: { nombre, activo: true },
-    });
+    let cat = await prisma.categoria.findFirst({ where: { nombre } });
+    if (!cat) {
+      cat = await prisma.categoria.create({ data: { nombre, activo: true } });
+    }
     categorias.push(cat);
   }
 
@@ -121,7 +120,10 @@ async function main() {
 
   const proveedores: any[] = [];
   for (const p of proveedoresData) {
-    const prov = await prisma.proveedor.create({ data: { ...p, activo: true } });
+    let prov = await prisma.proveedor.findFirst({ where: { nombre: p.nombre } });
+    if (!prov) {
+      prov = await prisma.proveedor.create({ data: { ...p, activo: true } });
+    }
     proveedores.push(prov);
   }
 
@@ -153,17 +155,20 @@ async function main() {
 
   const productos: any[] = [];
   for (const p of productosData) {
-    const prod = await prisma.producto.create({
-      data: {
-        nombre: p.nombre,
-        categoriaId: p.categoriaId,
-        proveedorId: p.proveedorId,
-        unidadMedida: p.unidadMedida,
-        precioUnitario: new Decimal(p.precioUnitario),
-        stockMinimo: new Decimal(p.stockMinimo),
-        activo: true,
-      },
-    });
+    let prod = await prisma.producto.findFirst({ where: { nombre: p.nombre } });
+    if (!prod) {
+      prod = await prisma.producto.create({
+        data: {
+          nombre: p.nombre,
+          categoriaId: p.categoriaId,
+          proveedorId: p.proveedorId,
+          unidadMedida: p.unidadMedida,
+          precioUnitario: new Decimal(p.precioUnitario),
+          stockMinimo: new Decimal(p.stockMinimo),
+          activo: true,
+        },
+      });
+    }
     productos.push(prod);
   }
 
