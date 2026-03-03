@@ -1,7 +1,6 @@
 generator client {
     provider = "prisma-client-js"
     binaryTargets = ["native", "linux-musl-arm64-openssl-3.0.x"]
-    output = "/home/ubuntu/chefmanager_pro/nextjs_space/node_modules/.prisma/client"
 }
 
 datasource db {
@@ -25,7 +24,6 @@ model Unidad {
   @@map("unidades")
 }
 
-// Categorías son globales - compartidas entre todas las unidades
 model Categoria {
   id        Int        @id @default(autoincrement())
   nombre    String     @unique
@@ -36,7 +34,6 @@ model Categoria {
   @@map("categorias")
 }
 
-// Proveedores son globales - compartidos entre todas las unidades
 model Proveedor {
   id        Int        @id @default(autoincrement())
   nombre    String
@@ -51,7 +48,6 @@ model Proveedor {
   @@map("proveedores")
 }
 
-// Productos son globales - compartidos entre todas las unidades
 model Producto {
   id            Int           @id @default(autoincrement())
   nombre        String
@@ -74,7 +70,7 @@ model Producto {
 model Usuario {
   id           Int          @id @default(autoincrement())
   email        String       @unique
-  password String       @map("password_hash")
+  password     String       @map("password_hash")
   nombre       String
   rol          String       @default("viewer")
   unidadId     Int?         @map("unidad_id")
