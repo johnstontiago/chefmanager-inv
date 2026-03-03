@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-options";
-import prisma from "@/lib/db";
+import { prisma } from "@/lib/db";
 import { Decimal } from "@prisma/client/runtime/library";
 import { toNumber } from "@/lib/utils";
 
@@ -30,9 +30,10 @@ export async function GET(request: Request) {
       where.tipo = tipo;
     }
 
+    // CORREGIDO: createdAt en vez de fecha
     const movimientos = await prisma.movimiento.findMany({
       where,
-      orderBy: { fecha: "desc" },
+      orderBy: { createdAt: "desc" },
       take: limit,
       include: {
         producto: {
