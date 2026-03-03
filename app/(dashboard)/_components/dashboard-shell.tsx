@@ -47,7 +47,7 @@ export default function DashboardShell({ user, children }: DashboardShellProps) 
   );
 
   const handleLogout = async () => {
-    await signOut({ redirect: true, callbackUrl: `${window.location.origin}/login` });
+    await signOut({ redirect: true, callbackUrl: "/login");
   };
 
   return (
