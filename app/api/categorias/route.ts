@@ -45,7 +45,7 @@ export async function POST(request: Request) {
     }
 
     // Verificar si ya existe
-    const existing = await prisma.categoria.findUnique({ where: { nombre } });
+    const existing = await prisma.categoria.findFirst({ where: { nombre } });
     if (existing) {
       return NextResponse.json({ error: "Ya existe una categoría con ese nombre" }, { status: 400 });
     }
