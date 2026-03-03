@@ -80,7 +80,7 @@ export async function GET() {
     // Recent movements (last 10)
     const ultimosMovimientos = await prisma.movimiento.findMany({
       where: { unidadId },
-      orderBy: { fecha: "desc" },
+      orderBy: { createdAt: "desc" },
       take: 10,
       include: {
         producto: true,
