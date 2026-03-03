@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-options";
-import { prisma } from "@/lib/db";
+import prisma from "@/lib/db";
 import { Decimal } from "@prisma/client/runtime/library";
 import { toNumber } from "@/lib/utils";
 
@@ -21,6 +21,7 @@ export async function GET() {
       return NextResponse.json({ error: "Sin unidad" }, { status: 400 });
     }
 
+    // Pedido NO tiene usuario ni fechaPedido - solo createdAt
     const pedidos = await prisma.pedido.findMany({
       where: { unidadId },
       orderBy: { createdAt: "desc" },
@@ -81,11 +82,13 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Items requeridos" }, { status: 400 });
     }
 
+    // Calculate total
     let total = 0;
     for (const item of items) {
       total += parseFloat(item.cantidad) * parseFloat(item.precioUnitario);
     }
 
+    // Create pedido - NO tiene usuarioId
     const pedido = await prisma.pedido.create({
       data: {
         unidadId,

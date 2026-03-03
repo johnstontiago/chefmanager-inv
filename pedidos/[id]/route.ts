@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-options";
-import { prisma } from "@/lib/db";
+import prisma from "@/lib/db";
 import { toNumber } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -25,10 +25,12 @@ export async function GET(
       whereClause.unidadId = user.unidadId;
     }
 
+    // Pedido NO tiene usuario
     const pedido = await prisma.pedido.findFirst({
       where: whereClause,
       include: {
-        proveedor: { select: { nombre: true } },
+        proveedor: { select: { id: true, nombre: true } },
+        unidad: { select: { id: true, nombre: true } },
         items: {
           include: {
             producto: {

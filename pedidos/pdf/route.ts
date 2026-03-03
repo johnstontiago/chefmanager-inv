@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-options";
-import { prisma } from "@/lib/db";
+import prisma from "@/lib/db";
 import { toNumber, formatCurrency, formatDate, formatDecimal } from "@/lib/utils";
 import archiver from "archiver";
 
@@ -61,7 +61,7 @@ function generatePDFHtml(
       
       <div class="info-grid">
         <div class="info-box">
-          <label>N\u00famero de Pedido</label>
+          <label>Número de Pedido</label>
           <p>#${pedido.id}</p>
         </div>
         <div class="info-box">
@@ -166,13 +166,14 @@ export async function POST(request: Request) {
     const { pedidoId, tipo } = await request.json();
 
     if (!pedidoId || !tipo) {
-      return NextResponse.json({ error: "Par\u00e1metros requeridos" }, { status: 400 });
+      return NextResponse.json({ error: "Parámetros requeridos" }, { status: 400 });
     }
 
+    // Pedido NO tiene usuario
     const pedido = await prisma.pedido.findFirst({
       where: { id: pedidoId, unidadId: user.unidadId },
       include: {
-        proveedor: { select: { nombre: true } },
+        proveedor: { select: { id: true, nombre: true } },
         items: {
           include: {
             producto: {
@@ -226,7 +227,7 @@ export async function POST(request: Request) {
         year: "numeric"
       }).replace(/\//g, "-");
 
-      const sanitizeName = (name: string) => name.replace(/[^a-zA-Z0-9\u00e1\u00e9\u00ed\u00f3\u00fa\u00f1\u00c1\u00c9\u00cd\u00d3\u00da\u00d1\s]/g, "").replace(/\s+/g, "_").substring(0, 30);
+      const sanitizeName = (name: string) => name.replace(/[^a-zA-Z0-9áéíóúñÁÉÍÓÚÑ\s]/g, "").replace(/\s+/g, "_").substring(0, 30);
 
       const generateProveedorHtml = (provNombre: string, provItems: any[]) => `
         <!DOCTYPE html>
@@ -260,7 +261,7 @@ export async function POST(request: Request) {
           
           <div class="info-grid">
             <div class="info-box">
-              <label>N\u00famero de Pedido</label>
+              <label>Número de Pedido</label>
               <p>#${pedido.id}</p>
             </div>
             <div class="info-box">
@@ -300,7 +301,7 @@ export async function POST(request: Request) {
           
           <div class="footer">
             <p>Generado el ${new Date().toLocaleDateString("es-ES", { day: "2-digit", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" })}</p>
-            <p>ChefManager Pro \u00a9 ${new Date().getFullYear()}</p>
+            <p>ChefManager Pro © ${new Date().getFullYear()}</p>
           </div>
         </body>
         </html>
@@ -329,11 +330,8 @@ export async function POST(request: Request) {
           return NextResponse.json({ error: "Error generando PDFs" }, { status: 500 });
         }
 
-        const { Readable } = await import("stream");
         const chunks: Buffer[] = [];
-        
         const archive = archiver("zip", { zlib: { level: 9 } });
-        
         archive.on("data", (chunk: Buffer) => chunks.push(chunk));
         
         const archivePromise = new Promise<Buffer>((resolve, reject) => {
@@ -358,7 +356,7 @@ export async function POST(request: Request) {
     } else if (tipo === "por_categoria") {
       const byCategoria: Record<string, any[]> = {};
       for (const item of items) {
-        const catNombre = item.producto?.categoria?.nombre || "Sin Categor\u00eda";
+        const catNombre = item.producto?.categoria?.nombre || "Sin Categoría";
         if (!byCategoria[catNombre]) byCategoria[catNombre] = [];
         byCategoria[catNombre].push(item);
       }
@@ -386,7 +384,7 @@ export async function POST(request: Request) {
         </head>
         <body>
           <div class="header">
-            <h1>Pedido #${pedido.id} - Por Categor\u00eda</h1>
+            <h1>Pedido #${pedido.id} - Por Categoría</h1>
             <p>Fecha: ${formatDate(pedido.createdAt)}</p>
           </div>
       `;
@@ -400,7 +398,7 @@ export async function POST(request: Request) {
           ${idx > 0 ? '<div class="page-break"></div>' : ""}
           <div class="section">
             <div class="section-title">
-              <h2>Categor\u00eda: ${cat}</h2>
+              <h2>Categoría: ${cat}</h2>
             </div>
             <table>
               <thead>
