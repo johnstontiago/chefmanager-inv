@@ -41,7 +41,7 @@ async function main() {
     update: {},
     create: {
       email: "johnstontiago02@gmail.com",
-      passwordHash: superuserHash,
+      password: superuserHash,
       nombre: "Super Admin",
       rol: "superuser",
       unidadId: unidad1.id,
@@ -55,7 +55,7 @@ async function main() {
     update: {},
     create: {
       email: "admin.central@chefmanager.com",
-      passwordHash: adminHash,
+      password: adminHash,
       nombre: "Admin Central",
       rol: "admin",
       unidadId: unidad1.id,
@@ -69,7 +69,7 @@ async function main() {
     update: {},
     create: {
       email: "admin.norte@chefmanager.com",
-      passwordHash: adminHash,
+      password: adminHash,
       nombre: "Admin Norte",
       rol: "admin",
       unidadId: unidad2.id,
@@ -84,7 +84,7 @@ async function main() {
     update: {},
     create: {
       email: "john@doe.com",
-      passwordHash: await bcrypt.hash("johndoe123", 10),
+      password: await bcrypt.hash("johndoe123", 10),
       nombre: "John Doe",
       rol: "superuser",
       unidadId: unidad1.id,

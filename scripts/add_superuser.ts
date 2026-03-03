@@ -4,7 +4,7 @@ import bcrypt from 'bcryptjs';
 const prisma = new PrismaClient();
 
 async function main() {
-  const passwordHash = await bcrypt.hash('984555', 10);
+  const hashedPassword = await bcrypt.hash('984555', 10);
   
   // Get the first unit
   let unidad = await prisma.unidad.findFirst();
@@ -24,13 +24,13 @@ async function main() {
   const user = await prisma.usuario.upsert({
     where: { email: 'johnstontiago02@gmail.com' },
     update: {
-      passwordHash: passwordHash,
+      password: hashedPassword,
       rol: 'superuser',
       activo: true
     },
     create: {
       email: 'johnstontiago02@gmail.com',
-      passwordHash: passwordHash,
+      password: hashedPassword,
       nombre: 'Tiago Johnston',
       rol: 'superuser',
       unidadId: unidad.id,
