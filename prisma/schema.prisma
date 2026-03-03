@@ -16,6 +16,7 @@ model Unidad {
   telefono    String?
   activo      Boolean      @default(true)
   createdAt   DateTime     @default(now()) @map("created_at")
+  updatedAt   DateTime     @default(now()) @updatedAt @map("updated_at")
   usuarios    Usuario[]
   pedidos     Pedido[]
   inventario  Inventario[]
@@ -42,6 +43,7 @@ model Proveedor {
   email     String?
   activo    Boolean    @default(true)
   createdAt DateTime   @default(now()) @map("created_at")
+  updatedAt DateTime   @default(now()) @updatedAt @map("updated_at")
   productos Producto[]
   pedidos   Pedido[]
 
@@ -77,6 +79,7 @@ model Usuario {
   pinCode      String?      @map("pin_code")
   activo       Boolean      @default(true)
   createdAt    DateTime     @default(now()) @map("created_at")
+  updatedAt    DateTime     @default(now()) @updatedAt @map("updated_at")
   unidad       Unidad?      @relation(fields: [unidadId], references: [id])
   pedidos      Pedido[]
   movimientos  Movimiento[]
