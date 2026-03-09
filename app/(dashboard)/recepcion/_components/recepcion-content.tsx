@@ -156,18 +156,12 @@ export default function RecepcionContent({ userRole }: RecepcionContentProps) {
         });
       }
 
-      // Mark order as received if all items received
-      const allReceived = selectedPedido.items?.every(
-        (item: any) => recepcionData[item.id]?.recibido
-      );
-
-      if (allReceived) {
-        await fetch(`/api/pedidos/${selectedPedido.id}`, {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ estado: "recibido" }),
-        });
-      }
+      // Mark order as received when confirming reception
+      await fetch(`/api/pedidos/${selectedPedido.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ estado: "recibido" }),
+      });
 
       toast({
         title: "Recepción completada",
